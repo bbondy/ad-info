@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/bbondy/ad-info/issues"
   },
-  "homepage": "https://github.com/bbondy/ad-info#readme"
+  "homepage": "https://github.com/bbondy/ad-info#readme",
+  "dependencies": {
+    "phantomjs2": "^2.0.0"
+  }
 }
