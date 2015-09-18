@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/bbondy/ad-info#readme",
   "dependencies": {
+    "abp-filter-parser": "^0.1.10",
     "phantomjs2": "^2.0.0"
   }
 }
