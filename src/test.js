@@ -1,5 +1,9 @@
+var fs = require('fs');
 var page = require('webpage').create(),
     system = require('system');
+
+var ABPFilterParser = require(fs.workingDirectory + '/lib/abp-filter-parser-commonjs');
+console.log(ABPFilterParser);
 
 function checkReadyState(done) {
   setTimeout(function () {
