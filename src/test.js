@@ -16,7 +16,7 @@ function checkReadyState(done) {
     } else {
       checkReadyState(done);
     }
-  }, 15000);
+  }, 12000);
 }
 
 function pageLoadDone() {
@@ -28,6 +28,28 @@ function pageLoadDone() {
         width === 320 && height === 50;
     }
 
+
+    // Gets the top most parent ID with the same dimensions as the
+    // passed in node
+    function getReplaceId(node, width, height) {
+      if (!node.parentNode) {
+        return node;
+      }
+
+      if (!node.parentNode.id) {
+        return node;
+      }
+
+      // TODO: Check against abp-filter html rules instead
+      var gptPlaceholder = node.parentNode.id.indexOf('gpt-ad-') !== -1;
+      var rect = node.parentNode.getBoundingClientRect();
+      if (!gptPlaceholder && (rect.width !== width || rect.height !== height)) {
+        return node;
+      }
+
+      return getReplaceId(node.parentNode, width, height);
+    }
+
     var iframes = document.querySelectorAll('iframe');
     var iframesData = [];
     for (var i = 0; i < iframes.length; i++) {
@@ -35,21 +57,28 @@ function pageLoadDone() {
       var rect = iframe.getBoundingClientRect();
       if (isSupportedAdSize(rect.width, rect.height)) {
         iframesData.push({
-          src: iframe.src,
+          //src: iframe.src,
           width: rect.width,
           height: rect.height,
-          top: rect.top,
-          left: rect.left
+          //top: rect.top,
+          //left: rect.left,
+          //name: iframe.name,
+          //id: iframe.id,
+          replaceId: getReplaceId(iframe, rect.width, rect.height).id
         });
       }
     }
     return iframesData;
   });
 
+  console.log(JSON.stringify(iframesData));
+  /*
   for (var i = 0; i < iframesData.length; i++) {
     var iframeData = iframesData[i];
-    console.log(JSON.stringify(iframeData));
+    //console.log(JSON.stringify(iframeData));
+    console.log(iframeData);
   }
+  */
   phantom.exit();
 }
 
