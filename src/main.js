@@ -1,7 +1,6 @@
-require("babel/polyfill");
+require('babel/polyfill');
 var phantom = require('node-slimer');
-var fs = require('fs');
-var ABPFilterParser = require('abp-filter-parser');
+//var ABPFilterParser = require('abp-filter-parser');
 var slimer;
 
 export function init(slimerPath) {
@@ -28,7 +27,7 @@ export function exit(exitCode = 0) {
   return exitCode;
 }
 
-function createPage(url) {
+function createPage() {
   return new Promise((resolve, reject) => {
     slimer.createPage((err, page) => {
       if (err) {
@@ -46,7 +45,7 @@ function waitForReadyState(page) {
     let intervalLength = 1000;
     let maxWaitTime = 15000;
     let intervalId = setInterval(function() {
-      let readyState = page.evaluate(function () {
+      page.evaluate(function () {
         return document.readyState;
       }, function(err, readyState) {
         if (err) {
@@ -55,7 +54,7 @@ function waitForReadyState(page) {
         }
         console.log('ready state update err', err, 'readystate', readyState);
         elapsed += intervalLength;
-        if (elapsed > maxWaitTime || "complete" === readyState) {
+        if (elapsed > maxWaitTime || readyState === 'complete') {
           clearInterval(intervalId);
           resolve(page);
         }
@@ -64,10 +63,10 @@ function waitForReadyState(page) {
   });
 }
 
-export function navigate(url) {
+function navigate(url) {
   return new Promise((resolve, reject) => {
-    createPage(url).then(page => {
-      page.open(url, function (err, status) {
+    createPage().then(page => {
+      page.open(url, function (err) {
         if (err) {
           reject(err);
         } else {
@@ -81,9 +80,9 @@ export function navigate(url) {
   });
 }
 
-function getAdInfo(page) {
+function extractIframes(page) {
   return new Promise((resolve, reject) => {
-    var iframesData = page.evaluate(function () {
+    page.evaluate(function () {
       function isSupportedAdSize(width, height) {
         return width === 728 && height === 90 ||
           width === 300 && height === 250 ||
@@ -148,22 +147,22 @@ function getAdInfo(page) {
         }
       }
       return iframesData;
-    }, function(err, result) {
+    }, function(err, iframesData) {
       if (err) {
         reject(err);
       } else {
-        resolve(result);
+        resolve(iframesData);
       }
     });
   });
 }
 
-
-init('./slimerjs-0.9.6/slimerjs')
-  .then(navigate.bind(null, 'http://www.slashdot.org'))
-  .then(waitForReadyState)
-  .then(getAdInfo)
-  .then((info) => {
-    console.log(info);
-  })
-  .then(exit.bind(null, 0));
+export function getAdInfo(url) {
+  return new Promise((resolve, reject) => {
+    navigate(url)
+      .then(waitForReadyState)
+      .then(extractIframes)
+      .then(resolve)
+      .catch(reject);
+  });
+}
