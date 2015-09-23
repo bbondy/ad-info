@@ -39,7 +39,7 @@ function createPage() {
           loadImages: false,
           userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1',
           webSecurityEnabled: false,
-          resourceTimeout: 10000,
+          resourceTimeout: 15000,
         }, (err) => {
           if (err) {
             console.warn('Could not set page settings', err);
@@ -63,6 +63,7 @@ function waitForReadyState(page) {
       }, function(err, readyState) {
         if (err) {
           console.error('err on waitForReadyState:', err);
+          page.close();
           reject(err);
         }
         console.log('ready state update err', err, 'readystate', readyState);
@@ -81,8 +82,10 @@ function navigate(url) {
     createPage().then(page => {
       page.open(url, function (err, status) {
         if (err) {
+          page.close();
           reject(err);
         } else if (status === 'timeout') {
+          page.close();
           reject('Timeout');
         } else {
           resolve(page);
