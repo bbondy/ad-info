@@ -36,7 +36,7 @@
       }, {
         phantomPath: slimerPath,
         parameters: {
-          'load-images': 'no'
+          'load-images': 'false'
         }
       });
     });
@@ -71,7 +71,7 @@
           return document.readyState;
         }, function (err, readyState) {
           if (err) {
-            console.log('err on waitForReadyState:', err);
+            console.error('err on waitForReadyState:', err);
             reject(err);
           }
           console.log('ready state update err', err, 'readystate', readyState);
@@ -96,7 +96,7 @@
           }
         });
       })['catch'](function (err) {
-        console.log('create page err!');
+        console.error('create page err:', err);
         reject(err);
       });
     });
