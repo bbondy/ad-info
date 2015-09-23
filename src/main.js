@@ -35,7 +35,18 @@ function createPage() {
       if (err) {
         reject(err);
       } else {
-        resolve(page);
+        page.set('settings', {
+          loadImages: false,
+          userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1',
+          webSecurityEnabled: false,
+          resourceTimeout: 10000,
+        }, (err) => {
+          if (err) {
+            console.warn('Could not set page settings', err);
+            reject(err);
+          }
+          resolve(page);
+        });
       }
     });
   });
@@ -68,9 +79,11 @@ function waitForReadyState(page) {
 function navigate(url) {
   return new Promise((resolve, reject) => {
     createPage().then(page => {
-      page.open(url, function (err) {
+      page.open(url, function (err, status) {
         if (err) {
           reject(err);
+        } else if (status === 'timeout') {
+          reject('Timeout');
         } else {
           resolve(page);
         }
@@ -150,6 +163,7 @@ function extractIframes(page) {
       }
       return iframesData;
     }, function(err, iframesData) {
+      page.close();
       if (err) {
         reject(err);
       } else {
