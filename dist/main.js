@@ -19,7 +19,6 @@
   exports.init = init;
   exports.exit = exit;
   exports.getAdInfo = getAdInfo;
-  require('babel/polyfill');
   var phantom = require('node-slimer');
   //var ABPFilterParser = require('abp-filter-parser');
   var slimer;

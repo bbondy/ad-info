@@ -1,4 +1,3 @@
-require('babel/polyfill');
 var phantom = require('node-slimer');
 //var ABPFilterParser = require('abp-filter-parser');
 var slimer;
