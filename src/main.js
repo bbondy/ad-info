@@ -2,7 +2,10 @@ var phantom = require('node-slimer');
 //var ABPFilterParser = require('abp-filter-parser');
 var slimer;
 
-export function init(slimerPath) {
+var slimerjs = require('slimerjs')
+var binPath = slimerjs.path
+
+export function init() {
   return new Promise((resolve, reject) => {
     phantom.create((err, sl) => {
       slimer = sl;
@@ -13,7 +16,7 @@ export function init(slimerPath) {
         resolve(slimer);
       }
     }, {
-      phantomPath: slimerPath,
+      phantomPath: binPath,
       parameters: {
         'load-images': 'false',
       }
