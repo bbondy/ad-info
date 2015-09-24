@@ -58,11 +58,15 @@
         if (err) {
           reject(err);
         } else {
+          // To enable logging:
+          // page.onConsoleMessage = function(msg, lineNum, sourceId) {
+          //    console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
+          // };
           page.set('settings', {
             loadImages: false,
             userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1',
             webSecurityEnabled: false,
-            resourceTimeout: 15000
+            resourceTimeout: 25000
           }, function (err) {
             if (err) {
               console.warn('Could not set page settings', err);
@@ -148,7 +152,7 @@
             var node = _x2,
                 width = _x3,
                 height = _x4;
-            gptPlaceholder = parentWidth = parentHeight = undefined;
+            parentWidth = parentHeight = gptPlaceholder = undefined;
             _again = false;
 
             if (!node.parentNode) {
@@ -159,13 +163,14 @@
               return node;
             }
 
-            // TODO: Check against abp-filter html rules instead
-            var gptPlaceholder = node.parentNode.id.indexOf('gpt-ad-') !== -1;
-            gptPlaceholder = gptPlaceholder || !!node.parentNode.children.length;
-
             var parentWidth = getElementContentWidth(node.parentNode);
             var parentHeight = getElementContentHeight(node.parentNode);
-            if (!gptPlaceholder && (parentWidth !== width || parentHeight !== height)) {
+
+            // TODO: Check against abp-filter html rules instead
+            var gptPlaceholder = node.parentNode.id.indexOf('gpt-ad-') !== -1;
+            if (!gptPlaceholder && (parentWidth > width || parentHeight > height) && (
+            // Single child parent which is close to the same size should be considered as replacement target
+            node.parentNode.children.length !== 1 || parentHeight - height > 100 || parentWidth - width > 100)) {
               return node;
             }
 
