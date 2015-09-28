@@ -10,6 +10,12 @@ var slimerjs = require('slimerjs')
 var binPath = slimerjs.path
 
 
+const startTime = () => process.hrtime();
+const endTime = (startTime) => {
+  let diff = process.hrtime(startTime);
+  return diff[0] * 1000 + diff[1] / 1000000; // divide by a million to get nano to milli
+}
+
 export function init(easyListPath) {
   return new Promise((resolve, reject) => {
     let easyListTxt = fs.readFileSync(easyListPath, 'utf-8');
@@ -50,9 +56,12 @@ function createPage(urlToNavigate) {
         page.onResourceRequested = function(requestData, networkRequest) {
           page.resourcesRequested = page.resourcesRequested || 0;
           page.resourcesBlocked = page.resourcesBlocked || [];
+          page.abpTime = page.abpTime || 0;
 
           let urlToCheck = url.parse(requestData[0].url);
           let currentPageHostname = url.parse(urlToNavigate).hostname;
+
+          let abpTime = startTime();
           if (ABPFilterParser.matches(parsedFilterData, urlToCheck.href, {
             domain: currentPageHostname,
             elementTypeMaskMap: ABPFilterParser.elementTypes.SCRIPT,
@@ -62,6 +71,7 @@ function createPage(urlToNavigate) {
           } else {
             // console.log('noblock: ', urlToCheck.href);
           }
+          page.abpTime += endTime(abpTime);
 
           //console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
         };
@@ -205,6 +215,7 @@ function extractIframes(page) {
           numResourcesRequested: page.resourcesRequested,
           numResourcesBlocked: page.resourcesBlocked.length,
           resourcesBlocked: page.resourcesBlocked,
+          abpTime: page.abpTime,
           iframesData
         });
       }

@@ -30,6 +30,14 @@
   var slimerjs = require('slimerjs');
   var binPath = slimerjs.path;
 
+  var startTime = function startTime() {
+    return process.hrtime();
+  };
+  var endTime = function endTime(startTime) {
+    var diff = process.hrtime(startTime);
+    return diff[0] * 1000 + diff[1] / 1000000; // divide by a million to get nano to milli
+  };
+
   function init(easyListPath) {
     return new Promise(function (resolve, reject) {
       var easyListTxt = fs.readFileSync(easyListPath, 'utf-8');
@@ -72,17 +80,22 @@
           page.onResourceRequested = function (requestData, networkRequest) {
             page.resourcesRequested = page.resourcesRequested || 0;
             page.resourcesBlocked = page.resourcesBlocked || [];
+            page.abpTime = page.abpTime || 0;
 
             var urlToCheck = url.parse(requestData[0].url);
             var currentPageHostname = url.parse(urlToNavigate).hostname;
+
+            var abpTime = startTime();
             if (ABPFilterParser.matches(parsedFilterData, urlToCheck.href, {
               domain: currentPageHostname,
               elementTypeMaskMap: ABPFilterParser.elementTypes.SCRIPT
             })) {
               // console.log('block: ', urlToCheck.href);
               page.resourcesBlocked.push(urlToCheck.href);
-            } else {}
-            // console.log('noblock: ', urlToCheck.href);
+            } else {
+              // console.log('noblock: ', urlToCheck.href);
+            }
+            page.abpTime += endTime(abpTime);
 
             //console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
           };
@@ -235,6 +248,7 @@
             numResourcesRequested: page.resourcesRequested,
             numResourcesBlocked: page.resourcesBlocked.length,
             resourcesBlocked: page.resourcesBlocked,
+            abpTime: page.abpTime,
             iframesData: iframesData
           });
         }
