@@ -71,8 +71,7 @@
           // };
           page.onResourceRequested = function (requestData, networkRequest) {
             page.resourcesRequested = page.resourcesRequested || 0;
-            page.resourcesBlocked = page.resourcesBlocked || 0;
-            page.resourcesRequested++;
+            page.resourcesBlocked = page.resourcesBlocked || [];
 
             var urlToCheck = url.parse(requestData[0].url);
             var currentPageHostname = url.parse(urlToNavigate).hostname;
@@ -81,7 +80,7 @@
               elementTypeMaskMap: ABPFilterParser.elementTypes.SCRIPT
             })) {
               // console.log('block: ', urlToCheck.href);
-              ++page.resourcesBlocked;
+              page.resourcesBlocked.push(urlToCheck.href);
             } else {}
             // console.log('noblock: ', urlToCheck.href);
 
@@ -233,7 +232,8 @@
           reject(err);
         } else {
           resolve({
-            resourcesRequested: page.resourcesRequested,
+            numResourcesRequested: page.resourcesRequested,
+            numResourcesBlocked: page.resourcesBlocked.length,
             resourcesBlocked: page.resourcesBlocked,
             iframesData: iframesData
           });
