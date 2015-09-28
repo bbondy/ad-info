@@ -77,11 +77,12 @@
           // page.onConsoleMessage = function(msg, lineNum, sourceId) {
           //    console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
           // };
-          page.onResourceRequested = function (requestData, networkRequest) {
-            page.resourcesRequested = page.resourcesRequested || 0;
-            page.resourcesBlocked = page.resourcesBlocked || [];
-            page.abpTime = page.abpTime || 0;
+          page.pageLoadStartTime = startTime();
+          page.resourcesRequested = 0;
+          page.resourcesBlocked = [];
+          page.abpTime = 0;
 
+          page.onResourceRequested = function (requestData, networkRequest) {
             var urlToCheck = url.parse(requestData[0].url);
             var currentPageHostname = url.parse(urlToNavigate).hostname;
 
@@ -249,6 +250,7 @@
             numResourcesBlocked: page.resourcesBlocked.length,
             resourcesBlocked: page.resourcesBlocked,
             abpTime: page.abpTime,
+            pageLoadTime: endTime(page.pageLoadStartTime),
             iframesData: iframesData
           });
         }
