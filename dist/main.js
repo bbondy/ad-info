@@ -62,11 +62,16 @@
           // page.onConsoleMessage = function(msg, lineNum, sourceId) {
           //    console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
           // };
+          page.onResourceRequested = function (requestData, networkRequest) {
+            page.resourcesRequested = page.resourcesRequested || 0;
+            page.resourcesRequested++;
+            //console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
+          };
           page.set('settings', {
             loadImages: false,
             userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1',
             webSecurityEnabled: false,
-            resourceTimeout: 25000
+            resourceTimeout: 60000
           }, function (err) {
             if (err) {
               console.warn('Could not set page settings', err);
@@ -207,7 +212,10 @@
         if (err) {
           reject(err);
         } else {
-          resolve(iframesData);
+          resolve({
+            resourcesRequested: page.resourcesRequested,
+            iframesData: iframesData
+          });
         }
       });
     });
