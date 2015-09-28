@@ -1,12 +1,20 @@
+require("babel/polyfill");
 var phantom = require('node-slimer');
-//var ABPFilterParser = require('abp-filter-parser');
+var fs = require('fs');
+var url = require('url');
+var ABPFilterParser = require('abp-filter-parser');
 var slimer;
+let parsedFilterData = {};
 
 var slimerjs = require('slimerjs')
 var binPath = slimerjs.path
 
-export function init() {
+
+export function init(easyListPath) {
   return new Promise((resolve, reject) => {
+    let easyListTxt = fs.readFileSync(easyListPath, 'utf-8');
+    ABPFilterParser.parse(easyListTxt, parsedFilterData);
+    console.log('Done parsing easylist!');
     phantom.create((err, sl) => {
       slimer = sl;
       if (err) {
@@ -29,7 +37,7 @@ export function exit(exitCode = 0) {
   return exitCode;
 }
 
-function createPage() {
+function createPage(urlToNavigate) {
   return new Promise((resolve, reject) => {
     slimer.createPage((err, page) => {
       if (err) {
@@ -41,7 +49,21 @@ function createPage() {
         // };
         page.onResourceRequested = function(requestData, networkRequest) {
           page.resourcesRequested = page.resourcesRequested || 0;
+          page.resourcesBlocked = page.resourcesBlocked || 0;
           page.resourcesRequested++;
+
+          let urlToCheck = url.parse(requestData[0].url);
+          let currentPageHostname = url.parse(urlToNavigate).hostname;
+          if (ABPFilterParser.matches(parsedFilterData, urlToCheck.href, {
+            domain: currentPageHostname,
+            elementTypeMaskMap: ABPFilterParser.elementTypes.SCRIPT,
+          })) {
+            // console.log('block: ', urlToCheck.href);
+            ++page.resourcesBlocked;
+          } else {
+            // console.log('noblock: ', urlToCheck.href);
+          }
+
           //console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
         };
         page.set('settings', {
@@ -86,10 +108,10 @@ function waitForReadyState(page) {
   });
 }
 
-function navigate(url) {
+function navigate(urlToNavigate) {
   return new Promise((resolve, reject) => {
-    createPage().then(page => {
-      page.open(url, function (err, status) {
+    createPage(urlToNavigate).then(page => {
+      page.open(urlToNavigate, function (err, status) {
         if (err) {
           page.close();
           reject(err);
@@ -182,6 +204,7 @@ function extractIframes(page) {
       } else {
         resolve({
           resourcesRequested: page.resourcesRequested,
+          resourcesBlocked: page.resourcesBlocked,
           iframesData
         });
       }
@@ -189,9 +212,9 @@ function extractIframes(page) {
   });
 }
 
-export function getAdInfo(url) {
+export function getAdInfo(urlToCheck) {
   return new Promise((resolve, reject) => {
-    navigate(url)
+    navigate(urlToCheck)
       .then(waitForReadyState)
       .then(extractIframes)
       .then(resolve)

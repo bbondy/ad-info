@@ -19,15 +19,22 @@
   exports.init = init;
   exports.exit = exit;
   exports.getAdInfo = getAdInfo;
+  require("babel/polyfill");
   var phantom = require('node-slimer');
-  //var ABPFilterParser = require('abp-filter-parser');
+  var fs = require('fs');
+  var url = require('url');
+  var ABPFilterParser = require('abp-filter-parser');
   var slimer;
+  var parsedFilterData = {};
 
   var slimerjs = require('slimerjs');
   var binPath = slimerjs.path;
 
-  function init() {
+  function init(easyListPath) {
     return new Promise(function (resolve, reject) {
+      var easyListTxt = fs.readFileSync(easyListPath, 'utf-8');
+      ABPFilterParser.parse(easyListTxt, parsedFilterData);
+      console.log('Done parsing easylist!');
       phantom.create(function (err, sl) {
         slimer = sl;
         if (err) {
@@ -52,7 +59,7 @@
     return exitCode;
   }
 
-  function createPage() {
+  function createPage(urlToNavigate) {
     return new Promise(function (resolve, reject) {
       slimer.createPage(function (err, page) {
         if (err) {
@@ -64,7 +71,20 @@
           // };
           page.onResourceRequested = function (requestData, networkRequest) {
             page.resourcesRequested = page.resourcesRequested || 0;
+            page.resourcesBlocked = page.resourcesBlocked || 0;
             page.resourcesRequested++;
+
+            var urlToCheck = url.parse(requestData[0].url);
+            var currentPageHostname = url.parse(urlToNavigate).hostname;
+            if (ABPFilterParser.matches(parsedFilterData, urlToCheck.href, {
+              domain: currentPageHostname,
+              elementTypeMaskMap: ABPFilterParser.elementTypes.SCRIPT
+            })) {
+              // console.log('block: ', urlToCheck.href);
+              ++page.resourcesBlocked;
+            } else {}
+            // console.log('noblock: ', urlToCheck.href);
+
             //console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
           };
           page.set('settings', {
@@ -109,10 +129,10 @@
     });
   }
 
-  function navigate(url) {
+  function navigate(urlToNavigate) {
     return new Promise(function (resolve, reject) {
-      createPage().then(function (page) {
-        page.open(url, function (err, status) {
+      createPage(urlToNavigate).then(function (page) {
+        page.open(urlToNavigate, function (err, status) {
           if (err) {
             page.close();
             reject(err);
@@ -214,6 +234,7 @@
         } else {
           resolve({
             resourcesRequested: page.resourcesRequested,
+            resourcesBlocked: page.resourcesBlocked,
             iframesData: iframesData
           });
         }
@@ -221,9 +242,9 @@
     });
   }
 
-  function getAdInfo(url) {
+  function getAdInfo(urlToCheck) {
     return new Promise(function (resolve, reject) {
-      navigate(url).then(waitForReadyState).then(extractIframes).then(resolve)['catch'](reject);
+      navigate(urlToCheck).then(waitForReadyState).then(extractIframes).then(resolve)['catch'](reject);
     });
   }
 });
