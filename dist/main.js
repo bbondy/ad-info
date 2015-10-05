@@ -83,6 +83,7 @@
           page.abpTime = 0;
 
           page.onResourceRequested = function (requestData, networkRequest) {
+            page.resourcesRequested++;
             var urlToCheck = url.parse(requestData[0].url);
             var currentPageHostname = url.parse(urlToNavigate).hostname;
 

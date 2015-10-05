@@ -59,6 +59,7 @@ function createPage(urlToNavigate) {
         page.abpTime = 0;
 
         page.onResourceRequested = function(requestData, networkRequest) {
+          page.resourcesRequested++;
           let urlToCheck = url.parse(requestData[0].url);
           let currentPageHostname = url.parse(urlToNavigate).hostname;
 
