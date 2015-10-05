@@ -26,6 +26,7 @@
   var ABPFilterParser = require('abp-filter-parser');
   var slimer;
   var parsedFilterData = {};
+  var cachedFilterData = {};
 
   var slimerjs = require('slimerjs');
   var binPath = slimerjs.path;
@@ -91,7 +92,7 @@
             if (ABPFilterParser.matches(parsedFilterData, urlToCheck.href, {
               domain: currentPageHostname,
               elementTypeMaskMap: ABPFilterParser.elementTypes.SCRIPT
-            })) {
+            }, cachedFilterData)) {
               // console.log('block: ', urlToCheck.href);
               page.resourcesBlocked.push(urlToCheck.href);
             } else {
@@ -252,6 +253,10 @@
             resourcesBlocked: page.resourcesBlocked,
             abpTime: page.abpTime,
             pageLoadTime: endTime(page.pageLoadStartTime),
+            bloomNegativeCount: cachedFilterData.bloomNegativeCount,
+            bloomPositiveCount: cachedFilterData.bloomPositiveCount,
+            notMatchCount: cachedFilterData.notMatchCount,
+            bloomFalsePositiveCount: cachedFilterData.bloomFalsePositiveCount,
             iframesData: iframesData
           });
         }
