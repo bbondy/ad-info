@@ -257,6 +257,7 @@
             bloomPositiveCount: cachedFilterData.bloomPositiveCount,
             notMatchCount: cachedFilterData.notMatchCount,
             bloomFalsePositiveCount: cachedFilterData.bloomFalsePositiveCount,
+            badFingerprints: cachedFilterData.badFingerprints,
             iframesData: iframesData
           });
         }
