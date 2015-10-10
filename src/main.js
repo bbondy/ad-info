@@ -1,4 +1,4 @@
-require("babel/polyfill");
+require('babel/polyfill');
 var phantom = require('node-slimer');
 var fs = require('fs');
 var url = require('url');
@@ -7,15 +7,14 @@ var slimer;
 let parsedFilterData = {};
 let cachedFilterData = {};
 
-var slimerjs = require('slimerjs')
-var binPath = slimerjs.path
-
+var slimerjs = require('slimerjs');
+var binPath = slimerjs.path;
 
 const startTime = () => process.hrtime();
-const endTime = (startTime) => {
-  let diff = process.hrtime(startTime);
+const endTime = start => {
+  let diff = process.hrtime(start);
   return diff[0] * 1000 + diff[1] / 1000000; // divide by a million to get nano to milli
-}
+};
 
 export function init(easyListPath) {
   return new Promise((resolve, reject) => {
@@ -59,7 +58,7 @@ function createPage(urlToNavigate) {
         page.resourcesBlocked = [];
         page.abpTime = 0;
 
-        page.onResourceRequested = function(requestData, networkRequest) {
+        page.onResourceRequested = function(requestData) {
           page.resourcesRequested++;
           let urlToCheck = url.parse(requestData[0].url);
           let currentPageHostname = url.parse(urlToNavigate).hostname;
@@ -83,10 +82,10 @@ function createPage(urlToNavigate) {
           userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1',
           webSecurityEnabled: false,
           resourceTimeout: 60000,
-        }, (err) => {
-          if (err) {
-            console.warn('Could not set page settings', err);
-            reject(err);
+        }, (err2) => {
+          if (err2) {
+            console.warn('Could not set page settings', err2);
+            reject(err2);
           }
           resolve(page);
         });
