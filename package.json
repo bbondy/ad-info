@@ -1,13 +1,13 @@
 {
   "name": "ad-info",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "",
   "main": "dist/main.js",
   "scripts": {
     "lint": "eslint src/*.js",
     "build": "babel --modules umd src --out-dir dist  --source-maps",
     "start": "npm run build && node dist/main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/bbondy/ad-info#readme",
   "dependencies": {
-    "abp-filter-parser": "^0.1.10",
+    "abp-filter-parser": "^0.2.0",
     "node-slimer": "^0.2.8",
     "slimerjs": "^0.9.6",
     "socket.io": "^0.9.6"
