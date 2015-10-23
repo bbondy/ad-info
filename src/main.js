@@ -224,6 +224,7 @@ function extractIframes(page) {
           notMatchCount: cachedFilterData.notMatchCount,
           bloomFalsePositiveCount: cachedFilterData.bloomFalsePositiveCount,
           badFingerprints: cachedFilterData.badFingerprints,
+          matchedFilters: cachedFilterData.matchedFilters,
           iframesData
         });
       }
