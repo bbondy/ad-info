@@ -54,14 +54,14 @@ function createPage(urlToNavigate) {
         //    console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
         // };
         page.pageLoadStartTime = startTime();
-        page.resourcesRequested = 0;
+        page.resourcesRequested = [];
         page.resourcesBlocked = [];
         page.abpTime = 0;
 
         page.onResourceRequested = function(requestData) {
-          page.resourcesRequested++;
           let urlToCheck = url.parse(requestData[0].url);
           let currentPageHostname = url.parse(urlToNavigate).hostname;
+          page.resourcesRequested.push(urlToCheck.href);
 
           let abpTime = startTime();
           if (ABPFilterParser.matches(parsedFilterData, urlToCheck.href, {
@@ -214,7 +214,8 @@ function extractIframes(page) {
         reject(err);
       } else {
         resolve({
-          numResourcesRequested: page.resourcesRequested,
+          numResourcesRequested: page.resourcesRequested.length,
+          resourcesRequested: page.resourcesRequested,
           numResourcesBlocked: page.resourcesBlocked.length,
           resourcesBlocked: page.resourcesBlocked,
           abpTime: page.abpTime,
