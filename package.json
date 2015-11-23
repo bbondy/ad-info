@@ -29,6 +29,7 @@
     "babel": "^5.8.23",
     "babel-core": "^5.8.25",
     "babel-eslint": "^4.1.3",
+    "babel-preset-es2015": "^6.0.15",
     "eslint": "^1.6.0"
   }
 }
