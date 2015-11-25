@@ -1,6 +1,6 @@
 {
   "name": "ad-info",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "",
   "main": "dist/main.js",
   "scripts": {
@@ -23,7 +23,8 @@
     "abp-filter-parser": "^0.2.0",
     "node-slimer": "^0.2.8",
     "slimerjs": "^0.9.6",
-    "socket.io": "^0.9.6"
+    "socket.io": "^0.9.6",
+    "babel-polyfill": "^6.1.0"
   },
   "devDependencies": {
     "babel": "^6.1.0",

@@ -2,7 +2,7 @@
 // the default number of milliseconds this process will wait for all page
 // requests to complete.
 
-require('babel/polyfill')
+require('babel-polyfill')
 var phantom = require('node-slimer')
 var fs = require('fs')
 var url = require('url')
