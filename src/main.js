@@ -231,6 +231,9 @@ function extractIframes (page) {
       if (err) {
         reject(err)
       } else {
+        // filter out empty replace id iframes
+        iframesData = iframesData.filter((iframe) => iframe.replaceId !== '')
+
         resolve({
           numResourcesRequested: page.resourcesRequested.length,
           resourcesRequested: page.resourcesRequested,
