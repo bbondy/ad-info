@@ -47,7 +47,16 @@ export function exit (exitCode = 0) {
   return exitCode
 }
 
-function createPage (urlToNavigate) {
+// register device classes (map of identifier to user agent string)
+export const deviceClasses = {
+  'iphone': 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_1_2 like Mac OS X) AppleWebKit/537.51.2 (KHTML, like Gecko) Mobile/11D257',
+  'desktop': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1'
+}
+
+function createPage (urlToNavigate, deviceClass) {
+  // default to a desktop deviceClass if not present
+  deviceClass = deviceClass || deviceClasses.desktop
+
   return new Promise((resolve, reject) => {
     slimer.createPage((err, page) => {
       if (err) {
@@ -81,12 +90,15 @@ function createPage (urlToNavigate) {
 
           // console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
         }
-        page.set('settings', {
+
+        let settings = {
           loadImages: false,
-          userAgent: 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1',
+          userAgent: deviceClasses[deviceClass],
           webSecurityEnabled: false,
           resourceTimeout: 60000
-        }, (err2) => {
+        }
+
+        page.set('settings', settings, (err2) => {
           if (err2) {
             console.warn('Could not set page settings', err2)
             reject(err2)
@@ -149,9 +161,9 @@ function setExternalTimeout (page, urlToNavigate, resolve, reject) {
   })
 }
 
-function navigate (urlToNavigate) {
+function navigate (urlToNavigate, deviceClass) {
   return new Promise((resolve, reject) => {
-    createPage(urlToNavigate).then(page => {
+    createPage(urlToNavigate, deviceClass).then(page => {
       setExternalTimeout(page, urlToNavigate, resolve, reject)
     }).catch(err => {
       console.error('create page err:', err)
@@ -254,9 +266,15 @@ function extractIframes (page) {
   })
 }
 
-export function getAdInfo (urlToCheck) {
+export function getAdInfo (urlToCheck, deviceClass) {
+  // if a device class is passed, check that it
+  // exists in the device class registry
+  if (deviceClass && !deviceClasses[deviceClass]) {
+    throw new Error(`unrecognized device class ${deviceClass}`)
+  }
+
   return new Promise((resolve, reject) => {
-    navigate(urlToCheck)
+    navigate(urlToCheck, deviceClass)
       .then(waitForReadyState)
       .then(extractIframes)
       .then(resolve)
