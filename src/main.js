@@ -55,7 +55,7 @@ export const deviceClasses = {
 
 function createPage (urlToNavigate, deviceClass) {
   // default to a desktop deviceClass if not present
-  deviceClass = deviceClass || deviceClasses.desktop
+  deviceClass = deviceClass || 'desktop'
 
   return new Promise((resolve, reject) => {
     slimer.createPage((err, page) => {
@@ -243,8 +243,10 @@ function extractIframes (page) {
       if (err) {
         reject(err)
       } else {
-        // filter out empty replace id iframes
-        iframesData = iframesData.filter((iframe) => iframe.replaceId !== '')
+        // filter out empty replace id iframes (check for null value)
+        if (iframesData) {
+          iframesData = iframesData.filter((iframe) => iframe.replaceId !== '')
+        }
 
         resolve({
           numResourcesRequested: page.resourcesRequested.length,
