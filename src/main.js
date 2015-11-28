@@ -53,7 +53,7 @@ export const deviceClasses = {
   'desktop': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1'
 }
 
-function createPage (urlToNavigate, deviceClass) {
+function createPage (urlToNavigate, deviceClass, matchCatcher) {
   // default to a desktop deviceClass if not present
   deviceClass = deviceClass || 'desktop'
 
@@ -80,7 +80,7 @@ function createPage (urlToNavigate, deviceClass) {
           if (ABPFilterParser.matches(parsedFilterData, urlToCheck.href, {
             domain: currentPageHostname,
             elementTypeMaskMap: ABPFilterParser.elementTypes.SCRIPT
-          }, cachedFilterData)) {
+          }, cachedFilterData, matchCatcher)) {
             // console.log('block: ', urlToCheck.href);
             page.resourcesBlocked.push(urlToCheck.href)
           } else {
@@ -161,9 +161,9 @@ function setExternalTimeout (page, urlToNavigate, resolve, reject) {
   })
 }
 
-function navigate (urlToNavigate, deviceClass) {
+function navigate (urlToNavigate, deviceClass, matchCatcher) {
   return new Promise((resolve, reject) => {
-    createPage(urlToNavigate, deviceClass).then(page => {
+    createPage(urlToNavigate, deviceClass, matchCatcher).then(page => {
       setExternalTimeout(page, urlToNavigate, resolve, reject)
     }).catch(err => {
       console.error('create page err:', err)
@@ -268,7 +268,7 @@ function extractIframes (page) {
   })
 }
 
-export function getAdInfo (urlToCheck, deviceClass) {
+export function getAdInfo (urlToCheck, deviceClass, matchCatcher) {
   // if a device class is passed, check that it
   // exists in the device class registry
   if (deviceClass && !deviceClasses[deviceClass]) {
@@ -276,7 +276,7 @@ export function getAdInfo (urlToCheck, deviceClass) {
   }
 
   return new Promise((resolve, reject) => {
-    navigate(urlToCheck, deviceClass)
+    navigate(urlToCheck, deviceClass, matchCatcher)
       .then(waitForReadyState)
       .then(extractIframes)
       .then(resolve)

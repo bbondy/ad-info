@@ -1,6 +1,6 @@
 {
   "name": "ad-info",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "",
   "main": "dist/main.js",
   "scripts": {
@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/bbondy/ad-info#readme",
   "dependencies": {
-    "abp-filter-parser": "^0.2.0",
+    "abp-filter-parser": "^0.2.1",
     "node-slimer": "^0.2.9",
     "slimerjs": "^0.9.6",
     "socket.io": "^0.9.6",
