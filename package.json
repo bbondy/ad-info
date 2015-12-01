@@ -21,7 +21,7 @@
   "homepage": "https://github.com/bbondy/ad-info#readme",
   "dependencies": {
     "abp-filter-parser": "^0.2.0",
-    "node-slimer": "^0.2.9",
+    "node-slimer": "^0.2.10",
     "slimerjs": "^0.9.6",
     "socket.io": "^0.9.6",
     "babel-polyfill": "^6.1.0"
